@@ -159,7 +159,7 @@ const RegistrationsManagement = ({
         adminUsername = sessionData.username || 'admin';
       }
       
-      // Direct update with explicit status and timestamps
+      // Prepare update data
       const updateData: any = {
         status,
         updated_at: new Date().toISOString()
@@ -168,12 +168,15 @@ const RegistrationsManagement = ({
       if (status === 'approved') {
         updateData.approved_date = new Date().toISOString();
         updateData.approved_by = adminUsername;
+      } else if (status === 'rejected') {
+        updateData.approved_by = null;
+        updateData.approved_date = null;
       } else if (status === 'pending') {
         updateData.approved_by = null;
         updateData.approved_date = null;
       }
       
-      // Use a direct SQL update bypassing RLS for admin operations
+      // Update the registration with proper WHERE clause
       const { error } = await supabase
         .from('registrations')
         .update(updateData)
